@@ -2,7 +2,7 @@
 #define yyHEADER_H 1
 #define yyIN_HEADER 1
 
-#line 6 "pcl-hpgl-scanner.h"
+#line 6 "..\\flexFun/pcl-hpgl.lexer.h"
 
 #define  YY_INT_ALIGNED short int
 
@@ -334,6 +334,6 @@ extern int yylex (yyscan_t yyscanner);
 #undef YY_DECL
 #endif
 
-#line 338 "pcl-hpgl-scanner.h"
+#line 338 "..\\flexFun/pcl-hpgl.lexer.h"
 #undef yyIN_HEADER
 #endif /* yyHEADER_H */

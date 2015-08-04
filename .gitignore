@@ -1,3 +1,4 @@
 *.user
 *.user.*
 lex.backup
+pcl-hpgl.lexer.cpp

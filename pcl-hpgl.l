@@ -4,13 +4,13 @@
 %option backup
 %option warn
 %option reentrant
-%option outfile="pcl-hpgl-scanner.cpp" header-file="pcl-hpgl-scanner.h"
 %option full 
 %option ecs
 
 
 
 %{
+#include <io.h>
 #define ENA_PRINTING
 %}
 
