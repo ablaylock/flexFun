@@ -33,8 +33,7 @@ CONFIG   -= app_bundle
 TEMPLATE = app
 
 
-SOURCES += main.cpp #pcl-hpgl-scanner.cpp
-HEADERS += pcl-hpgl.l #pcl-hpgl-scanner.h
+SOURCES += main.cpp
 
 DISTFILES += \
     flex.pri

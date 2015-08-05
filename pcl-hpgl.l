@@ -12,6 +12,8 @@
 %{
 #include <io.h>
 #define ENA_PRINTING
+const char * pclValueExtractor(const char *);
+const char * getJobName(const char *);
 %}
 
 %x PCL_ESCAPE_SEQ
@@ -37,7 +39,8 @@
 
 \x1b/[\x21-\x2f] {
 	#if defined(ENA_PRINTING)
-	printf("PCL Parameterized Escape Sequence\n");
+    //printf("PCL Parameterized Escape Sequence\n");
+    printf("PCL Command:\t");
 	#endif
 	BEGIN(PCL_ESCAPE_SEQ);
 }
@@ -57,11 +60,68 @@
 
 @PJL[ ]{1} {
 	#ifdef ENA_PRINTING
-	printf("PJL Command\n");
+    printf("PJL Command:\t");
 	#endif
-	BEGIN(INITIAL);
+    BEGIN(PJL_COMMAND);
 }
+
+    /* Add PJL commands*/
+<PJL_COMMAND>{
+     JOB[ ]NAME=.*\r?\n {
+        const char * jobName;
+        jobName = getJobName(yytext);
+        #if defined(ENA_PRINTING) || defined(ENA_JOB_NAME)
+        printf("Job Name String <%s>\n",jobName);
+        #endif
+        BEGIN(INITIAL);
+    }
+
+     ENTER[ ]LANGUAGE=PCL[ ]+\r?\n {
+         #ifdef ENA_PRINTING
+         printf("Language: PCL\n");
+         #endif
+         BEGIN(INITIAL);
+
+     }
+
+     EOJ[ \r\n]{0,256} {
+         #if defined(ENA_PRINTING) || defined(ENA_EOJ)
+         printf("End of job\n");
+         #endif
+         BEGIN(INITIAL);
+         yyterminate();
+    }
+}
+
 
 [ \t\n\r]{0,256}       /* skip whitespace */
 
 %%
+
+#define MAX_JOB_NAME_LEN (256)
+const char * getJobName(const char * in_str)
+{
+    // Make sure we have a null terminated string
+    static char name[MAX_JOB_NAME_LEN+1];
+    name[MAX_JOB_NAME_LEN] = '\0';
+    // Start figuring out the name location and length
+    const char * name_start = strstr(in_str,"=")+1;
+    size_t name_len = strcspn(name_start,"\n\r\t");
+    // Copy it
+    strncpy(name,name_start, (name_len > MAX_JOB_NAME_LEN) ? MAX_JOB_NAME_LEN : name_len);
+    name[name_len] = '\0';
+    return name;
+}
+
+const char * pclValueExtractor(const char * in_str)
+{
+    size_t  str_size = strlen(in_str);
+    if(str_size < 3)
+        return "\0"; // There is no value to extract
+    // Make sure we have a null terminated string
+    static char value[MAX_JOB_NAME_LEN+1];
+    value[str_size-2-1] = '\0';
+    strncpy(value,&in_str[2],str_size-2-1);
+    return value;
+}
+
