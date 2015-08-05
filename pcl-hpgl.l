@@ -93,6 +93,65 @@ const char * getJobName(const char *);
     }
 }
 
+<PCL_ESCAPE_SEQ>{
+    %1B	{
+        #ifdef ENA_PRINTING
+        printf("OPEN HPGL MODE\n");
+        #endif
+        BEGIN(HPGL_MODE);
+    }
+
+    %0B	{
+        #ifdef ENA_PRINTING
+        printf("CLOSE HPGL MODE -- HACK\n");
+        #endif
+        BEGIN(INITIAL);
+    }
+
+    [*]{1}r[0-9]{0,5}T {
+        #if defined(ENA_PRINTING)
+        int intValue;
+        const char * valueStr;
+        valueStr = pclValueExtractor(yytext);
+        intValue = atoi(valueStr);
+        printf("Set Raster Page Height <%d>\n", intValue);
+        #endif
+        BEGIN(INITIAL);
+    }
+
+    [*]{1}r[0-9]{0,5}S {
+        #if defined(ENA_PRINTING)
+        int intValue;
+        const char * valueStr;
+        valueStr = pclValueExtractor(yytext);
+        intValue = atoi(valueStr);
+        printf("Set Raster Page Width <%d>\n", intValue);
+        #endif
+        BEGIN(INITIAL);
+    }
+}
+
+
+ <HPGL_MODE>{
+    IN; {
+        #ifdef ENA_PRINTING
+        printf("Initialize HP-GL/2\n");
+        #endif
+    }
+
+    LT[\-0-9]{0,2}[;]? {
+        #ifdef ENA_PRINTING
+        printf("Set Line Type\n");
+        #endif
+    }
+
+    \x1b%0[AB] {
+        #ifdef ENA_PRINTING
+        printf("Exit HPGL mode\n");
+        #endif
+        BEGIN(INITIAL);
+    }
+}
 
 [ \t\n\r]{0,256}       /* skip whitespace */
 
